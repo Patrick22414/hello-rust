@@ -1,5 +1,5 @@
 [package]
-name = "hello-rust"
+name = "guess_game"
 version = "0.1.0"
 authors = ["Patrick Yang <ravencrown.ysy@gmail.com>"]
 edition = "2018"
