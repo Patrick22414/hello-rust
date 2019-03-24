@@ -1,3 +1,4 @@
+use std::env;
 use std::error::Error;
 use std::fs;
 
@@ -7,15 +8,20 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(args: &[String]) -> Result<Config, &str> {
-        if args.len() < 3 {
-            return Err("Not enough arguments!");
-        }
+    pub fn new(mut args: env::Args) -> Result<Config, &'static str> {
+        args.next(); // consume the first arg (minigrep.exe)
 
-        Ok(Config {
-            query: args[1].clone(),
-            filename: args[2].clone(),
-        })
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Cannot parse 'query'"),
+        };
+
+        let filename = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Cannot parse 'filename'"),
+        };
+
+        Ok(Config { query, filename })
     }
 }
 
@@ -38,13 +44,10 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 }
 
 pub fn search<'a>(query: &str, contents: &'a str) -> Result<Vec<&'a str>, String> {
-    let mut res = Vec::new();
-
-    for line in contents.lines() {
-        if line.contains(query) {
-            res.push(line);
-        }
-    }
+    let res: Vec<&str> = contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect();
 
     if res.is_empty() {
         Err(format!("Target file does not contain '{}'", query))
